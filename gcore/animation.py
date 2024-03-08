@@ -27,15 +27,15 @@ class Animation:
         if self.__finished or self.paused:
             return
 
-        if self.__i >= len(self.frames) - 1:
-            if self.looping: self.__i = 0
+        if self.i >= len(self.frames) - 1:
+            if self.looping: self.i = 0
             else: self.__finished = True
             return
 
         current_time = time.time()
         if current_time - self.__start_time >= 1.0 / self.fps:
             self.__start_time = current_time
-            self.__i += 1
+            self.i += 1
     
     def reset(self):
         self.i = 0
