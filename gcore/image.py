@@ -19,3 +19,10 @@ def load_sheet(
             )
         images.append(row)
     return images
+
+def is_empty(surface: pygame.Surface) -> bool:
+    for y in range(surface.get_height()):
+        for x in range(surface.get_width()):
+            if surface.get_at((x, y)) != pygame.Color(0, 0, 0, 0):
+                return False
+    return True

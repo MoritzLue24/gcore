@@ -1,6 +1,6 @@
 import time
-
 import pygame
+from . import image
 
 
 class Animation:
@@ -10,7 +10,7 @@ class Animation:
         fps: float,
         looping: bool
     ):
-        self.frames = frames
+        self.frames = [frame for frame in frames if not image.is_empty(frame)]
         self.fps = fps
         self.looping = looping
         
