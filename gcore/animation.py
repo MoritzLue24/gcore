@@ -1,6 +1,7 @@
 import time
 import pygame
 from . import image
+from .config import get_cfg
 
 
 class Animation:
@@ -10,7 +11,11 @@ class Animation:
         fps: float,
         looping: bool
     ):
-        self.frames = [frame for frame in frames if not image.is_empty(frame)]
+        self.frames = [
+            pygame.transform.scale_by(frame.convert_alpha(), get_cfg("scale"))
+            for frame in frames
+            if not image.is_empty(frame)
+        ]
         self.fps = fps
         self.looping = looping
         
