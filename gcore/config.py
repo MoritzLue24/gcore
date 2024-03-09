@@ -5,7 +5,10 @@ __config = {
 }
 
 def set_cfg(config: dict):
-    """Only can be called once"""
+    """
+    only can be called once,
+    make sure to call before creating objects
+    """
     global __cfg_set, __config
 
     if __cfg_set:
