@@ -24,9 +24,19 @@ class Animation:
 
         self.__start_time = time.time()
         self.__finished = False
+        self.__flipped = (False, False)
 
     def is_finished(self) -> bool:
         return self.__finished
+
+    def set_flip(self, vertical: bool, horizontal: bool):
+        for i, frame in enumerate(self.frames):
+            self.frames[i] = pygame.transform.flip(
+                frame,
+                self.__flipped[0] != vertical,
+                self.__flipped[1] != horizontal
+            )
+        self.__flipped = (vertical, horizontal)
 
     def update(self):
         if self.__finished or self.paused:
@@ -41,8 +51,9 @@ class Animation:
         if current_time - self.__start_time >= 1.0 / self.fps:
             self.__start_time = current_time
             self.i += 1
-    
+
     def reset(self):
+        """this does not affect if the frames are flipped"""
         self.i = 0
         self.paused = False
         self.__start_time = time.time()
