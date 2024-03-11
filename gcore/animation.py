@@ -12,7 +12,7 @@ class Animation:
         looping: bool
     ):
         self.frames = [
-            pygame.transform.scale_by(frame.convert_alpha(), get_cfg("scale"))
+            pygame.transform.scale_by(frame, get_cfg("scale"))
             for frame in frames
             if not image.is_empty(frame)
         ]

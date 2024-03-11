@@ -5,7 +5,7 @@ def load_sheet(
     path: str,
     image_size: tuple[int, int]
 ) -> list[list[pygame.Surface]]:
-    sheet = pygame.image.load(path)
+    sheet = pygame.image.load(path).convert_alpha()
     images = []
 
     for i in range(sheet.get_height() // image_size[1]):
