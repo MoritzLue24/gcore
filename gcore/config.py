@@ -3,7 +3,9 @@ __cfg_set = False
 __config = {
     "scale": 5,
     "dialogue_width": 650,
-    "dialogue_height": 200
+    "dialogue_height": 200,
+    "dialogue_border_width": 2,
+    "dialogue_padding": 40
 }
 
 def set_cfg(config: dict):
