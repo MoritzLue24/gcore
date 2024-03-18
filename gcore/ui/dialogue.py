@@ -13,18 +13,18 @@ class Dialogue:
         letters_per_second: float
     ):
         """the maximum number of options allowed is 3"""
-        self.text = text
+        self.lines = text.split("\n")
         self.options = options
         self.letters_per_second = letters_per_second
         
-        self.__text_i = 0    # if -1, the animation is finished
-        self.__text_surf = fonts["dialogue"].render(
-            text,
-            False,
-            (255, 255, 255)
-        )
+        self.__text_i = 0
+        self.__line_i = 0 # if -1, the animation is finished
+        self.__text_surfs = [
+            fonts["dialogue"].render(line, False, (255, 255, 255))
+            for line in self.lines
+        ]
         self.__start_time = time.time()
-
+        
         Dialogue.instances.append(self)
 
     @staticmethod
@@ -42,8 +42,8 @@ class Dialogue:
             opt_len = len(dialogue.options)
 
             if event.key == pygame.K_SPACE:
-                if dialogue.__text_i != -1:
-                    dialogue.__text_i = -1
+                if dialogue.__line_i != -1:
+                    dialogue.__line_i = -1
                     return -1
                 Dialogue.instances.pop(0)
                 return -1
@@ -63,14 +63,19 @@ class Dialogue:
 
         dialogue: Dialogue = Dialogue.instances[0]
         
+        print(dialogue.__text_i, dialogue.__line_i)
+
         current_time = time.time()
-        if dialogue.__text_i != -1 and \
+        if dialogue.__line_i != -1 and \
             current_time - dialogue.__start_time >= \
             1.0 / dialogue.letters_per_second:
 
             dialogue.__start_time = current_time
-            if dialogue.__text_i >= len(dialogue.text):
-                dialogue.__text_i = -1
+            if dialogue.__text_i >= len(dialogue.lines[dialogue.__line_i]):
+                dialogue.__text_i = 0
+                dialogue.__line_i += 1
+                if dialogue.__line_i >= len(dialogue.lines):
+                    dialogue.__line_i = -1
             else:
                 dialogue.__text_i += 1
 
@@ -89,19 +94,31 @@ class Dialogue:
         pygame.draw.rect(surface, (255, 0, 0), outer_rect)
         pygame.draw.rect(surface, (100, 50, 50), inner_rect)
 
-        if dialogue.__text_i == -1:
-            surface.blit(
-                dialogue.__text_surf,
-                (inner_rect.x + get_cfg("dialogue_padding"),
-                 inner_rect.y + get_cfg("dialogue_padding"))
-            )
+        spacing = fonts["dialogue"].get_linesize()
+        
+        if dialogue.__line_i == -1:
+            for i in range(len(dialogue.lines)):
+                surface.blit(
+                    dialogue.__text_surfs[i],
+                    (inner_rect.x + get_cfg("dialogue_padding"),
+                     inner_rect.y + get_cfg("dialogue_padding") + i * spacing)
+                )
             return
 
-        subtext = dialogue.text[:dialogue.__text_i + 1]
+        for i in range(dialogue.__line_i):
+            surface.blit(
+                dialogue.__text_surfs[i],
+                (inner_rect.x + get_cfg("dialogue_padding"),
+                 inner_rect.y + get_cfg("dialogue_padding") + i * spacing)
+            )
+
+        subtext = dialogue.lines[dialogue.__line_i][:dialogue.__text_i + 1]
         subtext_surf = fonts["dialogue"].render(subtext, False, (255, 255, 255))
 
         surface.blit(
             subtext_surf,
             (inner_rect.x + get_cfg("dialogue_padding"),
-             inner_rect.y + get_cfg("dialogue_padding"))
+             inner_rect.y + get_cfg("dialogue_padding") +
+                dialogue.__line_i * spacing)
         )
+
