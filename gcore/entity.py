@@ -32,22 +32,18 @@ class Entity:
     def get_flipped(self) -> tuple[bool, bool]:
         return self.__flipped
 
-    @staticmethod
-    def update():
-        for entity in Entity.instances:
-            for state, animation in entity.animations.items():
-                if state == entity.state:
-                    animation.update()
-                    if animation.is_finished():
-                        animation.reset()
-                        entity.state = entity.init_state
-                else:
+    def update(self):
+        for state, animation in self.animations.items():
+            if state == self.state:
+                animation.update()
+                if animation.is_finished():
                     animation.reset()
+                    self.state = self.init_state
+            else:
+                animation.reset()
 
-    @staticmethod
-    def draw(surface: pygame.Surface):
-        for entity in Entity.instances:
-            surface.blit(entity.animations[entity.state].current(), entity.pos)
+    def draw(self, surface: pygame.Surface):
+        surface.blit(self.animations[self.state].current(), self.pos)
 
     def delete(self):
         Entity.instances.remove(self)

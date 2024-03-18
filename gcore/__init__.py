@@ -7,11 +7,11 @@ from .item import Item
 
 
 def update_all():
-    Entity.update()
-    Item.update()
+    for entity in Entity.instances:
+        entity.update()
 
 def draw_all(surface):
-    Entity.draw(surface)
-    Item.draw(surface)
+    for entity in Entity.instances:
+        entity.draw(surface)
     ui.Dialogue.draw(surface)
 
