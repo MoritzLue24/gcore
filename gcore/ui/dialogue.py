@@ -62,8 +62,6 @@ class Dialogue:
             return
 
         dialogue: Dialogue = Dialogue.instances[0]
-        
-        print(dialogue.__text_i, dialogue.__line_i)
 
         current_time = time.time()
         if dialogue.__line_i != -1 and \
