@@ -19,9 +19,9 @@ class Animation:
         self.fps = fps
         self.looping = looping
         
-        self.i = 0
         self.paused = False
 
+        self.__i = 0
         self.__start_time = time.time()
         self.__finished = False
 
@@ -36,18 +36,18 @@ class Animation:
         if current_time - self.__start_time >= 1.0 / self.fps:
             self.__start_time = current_time
 
-            if self.i >= len(self.frames) - 1:
-                if self.looping: self.i = 0
+            if self.__i >= len(self.frames) - 1:
+                if self.looping: self.__i = 0
                 else: self.__finished = True
                 return
-            self.i += 1
+            self.__i += 1
 
     def reset(self):
         """this does not affect if the frames are flipped"""
-        self.i = 0
         self.paused = False
+        self.__i = 0
         self.__start_time = time.time()
         self.__finished = False
 
     def current(self) -> pygame.Surface:
-        return self.frames[self.i]
+        return self.frames[self.__i]
