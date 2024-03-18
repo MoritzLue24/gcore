@@ -24,19 +24,9 @@ class Animation:
 
         self.__start_time = time.time()
         self.__finished = False
-        self.__flipped = (False, False)
 
     def is_finished(self) -> bool:
         return self.__finished
-
-    def set_flip(self, vertical: bool, horizontal: bool):
-        for i, frame in enumerate(self.frames):
-            self.frames[i] = pygame.transform.flip(
-                frame,
-                self.__flipped[0] != vertical,
-                self.__flipped[1] != horizontal
-            )
-        self.__flipped = (vertical, horizontal)
 
     def update(self):
         if self.__finished or self.paused:

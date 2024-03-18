@@ -1,5 +1,4 @@
 import pygame
-
 from .animation import Animation
 
 
@@ -15,8 +14,23 @@ class Entity:
         self.animations = animations
         self.init_state = init_state
         self.state = init_state
+
+        self.__flipped = (False, False)
         
         Entity.instances.append(self)
+
+    def set_flipped(self, vertical: bool, horizontal: bool):
+        for anim in self.animations.values():
+            for i, frame in enumerate(anim.frames):
+                anim.frames[i] = pygame.transform.flip(
+                    frame,
+                    self.__flipped[0] != vertical,
+                    self.__flipped[1] != horizontal
+                )
+        self.__flipped = (vertical, horizontal)
+
+    def get_flipped(self) -> tuple[bool, bool]:
+        return self.__flipped
 
     @staticmethod
     def update():
