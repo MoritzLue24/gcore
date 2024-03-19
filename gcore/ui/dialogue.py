@@ -89,8 +89,8 @@ class Dialogue:
             outer_rect.width - 2 * get_cfg("dialogue_border_width"),
             outer_rect.height - 2 * get_cfg("dialogue_border_width")
         )
-        pygame.draw.rect(surface, (255, 0, 0), outer_rect)
-        pygame.draw.rect(surface, (100, 50, 50), inner_rect)
+        pygame.draw.rect(surface, get_cfg("dialogue_border_color"), outer_rect)
+        pygame.draw.rect(surface, get_cfg("dialogue_bg_color"), inner_rect)
 
         spacing = fonts["dialogue"].get_linesize()
         

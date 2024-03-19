@@ -5,7 +5,9 @@ __config = {
     "dialogue_width": 650,
     "dialogue_height": 200,
     "dialogue_border_width": 2,
-    "dialogue_padding": 40
+    "dialogue_padding": 40,
+    "dialogue_bg_color": (0, 0, 0),
+    "dialogue_border_color": (255, 255, 255)
 }
 
 def set_cfg(config: dict):
