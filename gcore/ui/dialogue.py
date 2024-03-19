@@ -10,12 +10,14 @@ class Dialogue:
         self,
         text: str,
         options: list[str],
-        letters_per_second: float
+        letters_per_second: float,
+        icon_path: str | None=None
     ):
         """the maximum number of options allowed is 3"""
         self.lines = text.split("\n")
         self.options = options
         self.letters_per_second = letters_per_second
+        self.icon = pygame.image.load(icon_path) if icon_path != None else None
         
         self.__text_i = 0
         self.__line_i = 0 # if -1, the animation is finished
@@ -91,6 +93,14 @@ class Dialogue:
         )
         pygame.draw.rect(surface, get_cfg("dialogue_border_color"), outer_rect)
         pygame.draw.rect(surface, get_cfg("dialogue_bg_color"), inner_rect)
+        
+        if dialogue.icon != None:
+            surface.blit(
+                dialogue.icon,
+                (inner_rect.x + inner_rect.w -
+                    dialogue.icon.get_size()[0] - get_cfg("dialogue_padding"),
+                inner_rect.y + get_cfg("dialogue_padding"))
+            )
 
         spacing = fonts["dialogue"].get_linesize()
         
@@ -119,4 +129,4 @@ class Dialogue:
              inner_rect.y + get_cfg("dialogue_padding") +
                 dialogue.__line_i * spacing)
         )
-
+        
