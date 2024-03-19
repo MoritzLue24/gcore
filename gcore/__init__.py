@@ -3,7 +3,7 @@ from . import ui
 from .config import set_cfg, append_cfg, get_cfg
 from .animation import Animation
 from .entity import Entity
-from .item import Item
+from .tiles import load_tileset, Tilemap
 
 
 def update_all():
