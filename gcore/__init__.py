@@ -4,6 +4,7 @@ from .config import set_cfg, append_cfg, get_cfg
 from .animation import Animation
 from .entity import Entity
 from .tiles import load_tileset, Tilemap
+from . import camera
 
 
 def update_all():

@@ -1,6 +1,8 @@
 import pygame
+
 from .image import load_sheet
 from .config import get_cfg
+from . import camera
 
 
 class Tile:
@@ -58,6 +60,6 @@ class Tilemap:
             for j, tile in enumerate(row):
                 surface.blit(
                     tile.image,
-                    (j * tile.image.get_width(),
-                     i * tile.image.get_height())
+                    pygame.Vector2(j * tile.image.get_width(),
+                        i * tile.image.get_height()) + camera.offset()
                 )

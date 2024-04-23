@@ -1,5 +1,6 @@
 import pygame
 from .animation import Animation
+from . import camera
 
 
 class Entity:
@@ -43,7 +44,7 @@ class Entity:
                 anim.reset()
 
     def draw(self, surface: pygame.Surface):
-        surface.blit(self.animations[self.state].current(), self.pos)
+        surface.blit(self.animations[self.state].current(), self.pos + camera.offset())
 
     def delete(self):
         Entity.instances.remove(self)
