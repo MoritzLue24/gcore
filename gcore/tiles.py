@@ -77,6 +77,9 @@ class Tilemap:
         the new entites collision.
         this function returns pos + dir if theres no collision."""
         col_point = pygame.Vector2()
+        
+
+
         if not self.get_at(col_point).collide:
             return entity_pos + entity_dir
         return entity_pos + entity_dir
