@@ -76,13 +76,54 @@ class Tilemap:
         'collide' attribute, get the point of collision so it can be set as
         the new entites collision.
         this function returns pos + dir if theres no collision."""
-        col_point = pygame.Vector2()
+        if entity_dir.magnitude() == 0: return entity_pos
         
+        tile_cols = []
+        for r, row in enumerate(self.__tiles):
+            for c, tile in enumerate(row):
+                if not tile.collide: continue
 
+                rect = pygame.Rect(r, c, 1, 1)
+                border_cols = []
+                sides = [
+                    (pygame.Vector2(rect.x, rect.y), pygame.Vector2(rect.w, 0)),
+                    (pygame.Vector2(rect.x, rect.y), pygame.Vector2(0, rect.h)),
+                    (pygame.Vector2(rect.x + rect.w, rect.y), pygame.Vector2(0, rect.h)),
+                    (pygame.Vector2(rect.x, rect.y + rect.h), pygame.Vector2(rect.w, 0))
+                ]
 
-        if not self.get_at(col_point).collide:
+                for side in sides:
+                    x1, y1 = entity_pos
+                    x2, y2 = entity_pos + entity_dir
+                    x3, y3 = side[0]
+                    x4, y4 = side[0] + side[1]
+
+                    slope1 = (y2 - y1) / (x2 - x1) if x2 - x1 != 0 else float('inf')
+                    slope2 = (y4 - y3) / (x4 - x3) if x4 - x3 != 0 else float('inf')
+                    if slope1 == slope2: continue
+                    
+                    intersection_x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) *
+                        (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) *
+                        (x3 - x4))
+                    intersection_y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) *
+                        (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) *
+                        (x3 - x4))
+
+                    # check if intersection point lies within the range of both lines
+                    if min(x1, x2) <= intersection_x <= max(x1, x2) and \
+                        min(y1, y2) <= intersection_y <= max(y1, y2) and \
+                        min(x3, x4) <= intersection_x <= max(x3, x4) and \
+                        min(y3, y4) <= intersection_y <= max(y3, y4):
+                        border_cols.append(pygame.Vector2(intersection_x, intersection_y))
+
+                border_cols.sort(key=lambda x: (entity_pos - x).magnitude())
+                if border_cols:
+                    tile_cols.append(border_cols[0])
+
+        tile_cols.sort(key=lambda x: (entity_pos - x).magnitude())
+        if not tile_cols:
             return entity_pos + entity_dir
-        return entity_pos + entity_dir
+        return tile_cols[0]
 
     def draw(self, surface: pygame.Surface):
         if Tilemap.active != self: return

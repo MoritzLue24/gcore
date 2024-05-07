@@ -24,7 +24,10 @@ class Entity:
 
     def move(self, dir: pygame.Vector2):
         if Tilemap.active == None: raise ValueError("cannot move without tilemap")
-        self.pos = Tilemap.active.collision_point(self.pos, dir)
+        col_point = Tilemap.active.collision_point(self.pos, dir)
+        if col_point != self.pos + dir:
+            col_point -= dir.normalize() * 0.01
+        self.pos = col_point
 
     def set_flipped(self, flip_x: bool, flip_y: bool):
         for anim in self.animations.values():
@@ -38,6 +41,12 @@ class Entity:
 
     def get_flipped(self) -> tuple[bool, bool]:
         return self.__flipped
+    
+    def display_pos(self) -> pygame.Vector2:
+        return pygame.Vector2(
+            self.pos.x * get_cfg("tile_size")[0],
+            self.pos.y * get_cfg("tile_size")[1]
+        ) * get_cfg("scale") + camera.offset()
 
     def update(self):
         for state, anim in self.animations.items():
