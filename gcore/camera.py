@@ -13,5 +13,5 @@ def offset() -> pygame.Vector2:
     real_pos = pygame.Vector2(
         __pos.x * get_cfg("tile_size")[0],
         __pos.y * get_cfg("tile_size")[1]
-    ) * get_cfg("scale")
+    ) * get_cfg("scale") / 10
     return pygame.Vector2(pygame.display.get_window_size()) // 2 - real_pos

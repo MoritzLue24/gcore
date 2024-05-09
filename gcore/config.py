@@ -7,7 +7,11 @@ __config = {
     "dialogue_border_width": 2,
     "dialogue_padding": 40,
     "dialogue_bg_color": (0, 0, 0),
-    "dialogue_border_color": (255, 255, 255)
+    "dialogue_border_color": (255, 255, 255),
+    "panel_border_width": 2,
+    "panel_padding": 5,
+    "panel_bg_color": (0, 0, 0, 200),
+    "panel_border_color": (255, 255, 255, 200)
 }
 
 def set_cfg(config: dict):
