@@ -32,7 +32,6 @@ class Entity:
 
         (col_point, col) = Tilemap.active.collision_point(self.pos, dir)
         # TODO: implement hitbox. move back to -dir accordinly
-        # TODO: wall slide (slide over wall when moving diagonal)
         if col:
             cd = math.gcd(*[int(dir.x), int(dir.y)])
             shortened = dir // cd
