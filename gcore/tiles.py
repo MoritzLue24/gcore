@@ -1,7 +1,6 @@
 import pygame
 from .image import load_sheet
 from .config import get_cfg
-from . import camera
 from .pos import screen_pos
 
 
@@ -111,10 +110,6 @@ class Tilemap:
                         (x3 - x4))
 
                     # check if intersection point lies within the range of both lines
-                    # col_x1 = min(round(x1), round(x2)) <= round(intersection_x) <= max(round(x1), round(x2))
-                    # col_y1 = min(round(y1), round(y2)) <= round(intersection_y) <= max(round(y1), round(y2))
-                    # col_x2 = min(round(x3), round(x4)) <= round(intersection_x) <= max(round(x3), round(x4))
-                    # col_y2 = min(round(y3), round(y4)) <= round(intersection_y) <= max(round(y3), round(y4))
                     col_x1 = min(x1, x2) <= intersection_x <= max(x1, x2)
                     col_y1 = min(y1, y2) <= intersection_y <= max(y1, y2)
                     col_x2 = min(x3, x4) <= intersection_x <= max(x3, x4)
