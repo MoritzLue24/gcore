@@ -7,6 +7,7 @@ from .pos import screen_pos, game_pos
 from .entity import Entity
 from .tiles import load_tileset, Tilemap
 from . import camera
+from . import utils
 
 
 def update_all():
