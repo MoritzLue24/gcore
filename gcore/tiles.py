@@ -2,6 +2,7 @@ import pygame
 from .image import load_sheet
 from .config import get_cfg
 from .pos import screen_pos
+from .utils import line_intersection, LinesAreParallel
 
 
 class Tile:
@@ -84,7 +85,6 @@ class Tilemap:
                 if not tile.collide: continue
 
                 rect = pygame.Rect(c * 10, r * 10, 10, 10)
-                border_cols = []
                 sides = [
                     (pygame.Vector2(rect.x, rect.y), pygame.Vector2(rect.w, 0)),
                     (pygame.Vector2(rect.x, rect.y), pygame.Vector2(0, rect.h)),
@@ -92,31 +92,13 @@ class Tilemap:
                     (pygame.Vector2(rect.x, rect.y + rect.h), pygame.Vector2(rect.w, 0))
                 ]
 
+                border_cols = []
                 for side in sides:
-                    x1, y1 = entity_pos
-                    x2, y2 = entity_pos + entity_dir
-                    x3, y3 = side[0]
-                    x4, y4 = side[0] + side[1]
-
-                    slope1 = (y2 - y1) / (x2 - x1) if x2 - x1 != 0 else float('inf')
-                    slope2 = (y4 - y3) / (x4 - x3) if x4 - x3 != 0 else float('inf')
-                    if slope1 == slope2: continue
-                    
-                    intersection_x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) *
-                        (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) *
-                        (x3 - x4))
-                    intersection_y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) *
-                        (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) *
-                        (x3 - x4))
-
-                    # check if intersection point lies within the range of both lines
-                    col_x1 = min(x1, x2) <= intersection_x <= max(x1, x2)
-                    col_y1 = min(y1, y2) <= intersection_y <= max(y1, y2)
-                    col_x2 = min(x3, x4) <= intersection_x <= max(x3, x4)
-                    col_y2 = min(y3, y4) <= intersection_y <= max(y3, y4)
-
-                    if col_x1 and col_y1 and col_x2 and col_y2:
-                        border_cols.append(pygame.Vector2(intersection_x, intersection_y))
+                    try:
+                        intersection, in_range = line_intersection(entity_pos, entity_dir, side[0], side[1])
+                        if in_range: border_cols.append(intersection)
+                    except LinesAreParallel:
+                        continue
 
                 border_cols.sort(key=lambda x: (entity_pos - x).magnitude())
                 if border_cols:
@@ -126,6 +108,15 @@ class Tilemap:
         if not tile_cols:
             return entity_pos + entity_dir, False
         return tile_cols[0], True
+    
+    def collide_rect(self, rect: pygame.Rect) -> bool:
+        for r, row in enumerate(self.__tiles):
+            for c, tile in enumerate(row):
+                if not tile.collide: continue
+                tile_rect = pygame.Rect(c * 10, r * 10, 10, 10)
+                if tile_rect.colliderect(rect):
+                    return True
+        return False
 
     def draw(self, surface: pygame.Surface):
         if Tilemap.active != self: return

@@ -1,10 +1,8 @@
 import pygame
-import math
 from .animation import Animation
 from .tiles import Tilemap
-from .config import get_cfg
-from . import camera
 from .pos import screen_pos
+from .utils import line_intersection, LinesAreParallel
 
 
 class Entity:
@@ -26,60 +24,58 @@ class Entity:
         
         Entity.instances.append(self)
 
-    def move(self, dir: pygame.Vector2):
-        dir = pygame.Vector2(int(dir.x), int(dir.y))
+    def move_ccd(self, dir: pygame.Vector2):
+        """move this entity and avoid tunneling (ccd)"""
         if Tilemap.active == None: raise ValueError("cannot move without tilemap")
+        dir = pygame.Vector2(int(dir.x), int(dir.y))
         if dir.magnitude() == 0: return
 
         # get point of collision `emit_point` between `rect` and self.pos + dir.
         # then, get the Tilemap collision point from `emit_point` + dir
         # FIXME: for some reason diagonal dirs do not work, only straight
-
+        # FIXME: use different approach: 
+        #   (now, it only works from a line on self.pos.y. every tile below that is ignored)
+        #   1. copyshift the hitbox rect along dir and check for rect-to-rect collision
+        #   2. use multiple lines exept jsut the pos + dir line. (from hitbox corners)
+        #   3. raycasting (inefficient)
         rect = pygame.Rect(
             self.pos.x - self.hitbox_size.x / 2,
             self.pos.y - self.hitbox_size.y / 2,
             self.hitbox_size.x,
             self.hitbox_size.y
         )
-        border_cols = []
         sides = [
             (pygame.Vector2(rect.x, rect.y), pygame.Vector2(rect.w, 0)),
             (pygame.Vector2(rect.x, rect.y), pygame.Vector2(0, rect.h)),
             (pygame.Vector2(rect.x + rect.w, rect.y), pygame.Vector2(0, rect.h)),
             (pygame.Vector2(rect.x, rect.y + rect.h), pygame.Vector2(rect.w, 0))
         ]
+        border_cols = []
         for side in sides:
-            x1, y1 = self.pos
-            x2, y2 = self.pos + dir
-            x3, y3 = side[0]
-            x4, y4 = side[0] + side[1]
-
-            slope1 = (y2 - y1) / (x2 - x1) if x2 - x1 != 0 else float('inf')
-            slope2 = (y4 - y3) / (x4 - x3) if x4 - x3 != 0 else float('inf')
-            if slope1 == slope2: continue
-            
-            intersection_x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) *
-                (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) *
-                (x3 - x4))
-            intersection_y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) *
-                (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) *
-                (x3 - x4))
-            intersection = pygame.Vector2(intersection_x, intersection_y)
-
-            # check if intersection point lies within the range of the hitbox rect
-            col_x2 = min(x3, x4) <= intersection_x <= max(x3, x4)
-            col_y2 = min(y3, y4) <= intersection_y <= max(y3, y4)
-
-            if col_x2 and col_y2:
-                border_cols.append(pygame.Vector2(intersection_x, intersection_y))
+            try:
+                intersection, _ = line_intersection(self.pos, dir, side[0], side[1])
+                border_cols.append(intersection)
+            except LinesAreParallel:
+                continue
 
         border_cols.sort(key=lambda x: (x - (self.pos + dir)).magnitude())
         emit_point = border_cols[0]
 
         (col_point, _) = Tilemap.active.collision_point(emit_point, dir)
-
         emit_diff = emit_point - self.pos
         self.pos = col_point - emit_diff
+    
+    def move(self, dir: pygame.Vector2):
+        if Tilemap.active == None: raise ValueError("cannot move without tilemap")
+        dir = pygame.Vector2(int(dir.x), int(dir.y))
+        rect = pygame.Rect(
+            self.pos.x - self.hitbox_size.x / 2 + dir.x,
+            self.pos.y - self.hitbox_size.y / 2 + dir.y,
+            self.hitbox_size.x,
+            self.hitbox_size.y
+        )
+        if not Tilemap.active.collide_rect(rect):
+            self.pos += dir
 
     def set_flipped(self, flip_x: bool, flip_y: bool):
         for anim in self.animations.values():
@@ -111,7 +107,7 @@ class Entity:
             self.animations[self.state].current(),
             screen_pos(self.pos) - image_offset
         )
-        pygame.draw.circle(surface, (255, 255, 255), screen_pos(self.pos), 7)
+        # pygame.draw.circle(surface, (255, 255, 255), screen_pos(self.pos), 7)
 
     def delete(self):
         Entity.instances.remove(self)
