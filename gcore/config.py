@@ -11,7 +11,8 @@ __config = {
     "panel_border_width": 2,
     "panel_padding": 5,
     "panel_bg_color": (0, 0, 0, 200),
-    "panel_border_color": (255, 255, 255, 200)
+    "panel_border_color": (255, 255, 255, 200),
+    "gravity": 0.1
 }
 
 def set_cfg(config: dict):

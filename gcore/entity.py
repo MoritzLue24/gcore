@@ -3,6 +3,7 @@ from .animation import Animation
 from .tiles import Tilemap
 from .pos import screen_pos
 from .utils import line_intersection, LinesAreParallel
+from .config import get_cfg
 
 
 class Entity:
@@ -18,6 +19,7 @@ class Entity:
         self.animations = animations
         self.state = init_state
         self.hitbox_size = hitbox_size
+        self.vel = 0
 
         self.__init_state = init_state
         self.__flipped = (False, False)
@@ -27,7 +29,6 @@ class Entity:
     def move_ccd(self, dir: pygame.Vector2):
         """move this entity and avoid tunneling (ccd)"""
         if Tilemap.active == None: raise ValueError("cannot move without tilemap")
-        dir = pygame.Vector2(int(dir.x), int(dir.y))
         if dir.magnitude() == 0: return
 
         # get point of collision `emit_point` between `rect` and self.pos + dir.
@@ -67,7 +68,6 @@ class Entity:
     
     def move(self, dir: pygame.Vector2):
         if Tilemap.active == None: raise ValueError("cannot move without tilemap")
-        dir = pygame.Vector2(int(dir.x), int(dir.y))
         rect = pygame.Rect(
             self.pos.x - self.hitbox_size.x / 2 + dir.x,
             self.pos.y - self.hitbox_size.y / 2 + dir.y,
@@ -76,6 +76,30 @@ class Entity:
         )
         if not Tilemap.active.collide_rect(rect):
             self.pos += dir
+
+    def move_copy(self, dir: pygame.Vector2) -> pygame.Vector2:
+        """just like regular move function, but does not modify self,
+        instead return new pos."""
+        if Tilemap.active == None: raise ValueError("cannot move without tilemap")
+        rect = pygame.Rect(
+            self.pos.x - self.hitbox_size.x / 2 + dir.x,
+            self.pos.y - self.hitbox_size.y / 2 + dir.y,
+            self.hitbox_size.x,
+            self.hitbox_size.y
+        )
+        if not Tilemap.active.collide_rect(rect):
+            return self.pos + dir
+        return self.pos
+
+    def grounded(self) -> bool:
+        if Tilemap.active == None: raise ValueError("cannot groundcheck without tilemap")
+        rect = pygame.Rect(
+            self.pos.x - self.hitbox_size.x / 2,
+            self.pos.y - self.hitbox_size.y / 2 + self.vel,
+            self.hitbox_size.x,
+            self.hitbox_size.y
+        )
+        return Tilemap.active.collide_rect(rect)
 
     def set_flipped(self, flip_x: bool, flip_y: bool):
         for anim in self.animations.values():
@@ -89,8 +113,16 @@ class Entity:
 
     def get_flipped(self) -> tuple[bool, bool]:
         return self.__flipped
-    
+
     def update(self):
+        # TODO: not all entites should be affected
+        # TODO: improve.
+        self.vel += get_cfg("gravity")
+        #if self.grounded():
+        #    self.vel = 0
+
+        self.move(pygame.Vector2(0, self.vel))
+
         for state, anim in self.animations.items():
             if state == self.state:
                 anim.update()
